@@ -1,0 +1,68 @@
+<sci_request version="1.0">
+    <file_system cache="false">
+        <targets>
+            <device id="00000000-00000000-001527FF-FFDB3896" />
+        </targets>
+        <commands>
+            <get_file path="SetupParameters.txt" />
+        </commands>
+    </file_system>
+</sci_request>
+<!-- response: Dwq/JQkEMmNQaEEBQQL4    [15, 10, 191, 37, 9, 4, 50, 99, 80, 104, 65, 1, 65, 2, 248] -->
+
+<sci_request version="1.0">
+    <data_service>
+        <targets>
+            <device id="00000000-00000000-001527FF-FFDB3896" />
+        </targets>
+        <requests>
+            <device_request target_name="Filters">DQq/IwwAAw+AAAMAyg==</device_request>
+        </requests>
+    </data_service>
+</sci_request>
+
+<sci_request version="1.0">
+    <data_service>
+        <targets>
+            <device id="00000000-00000000-001527FF-FFDB3896" />
+        </targets>
+        <requests>
+            <device_request target_name="SystemTime"> 20:17 </device_request>
+        </requests>
+    </data_service>
+</sci_request>
+
+<sci_request version="1.0">
+    <data_service>
+        <targets>
+            <device id="00000000-00000000-001527FF-FFDB3896" />
+        </targets>
+        <requests>
+            <device_request target_name="TimeFormat"> 24 </device_request>
+        </requests>
+    </data_service>
+</sci_request>
+
+<sci_request version="1.0">
+    <data_service>
+        <targets>
+            <device id="00000000-00000000-001527FF-FFDB3896" />
+        </targets>
+        <requests>
+            <device_request target_name="TempUnits">F</device_request>
+        </requests>
+    </data_service>
+</sci_request>
+
+<sci_request version="1.0">
+    <data_service>
+        <targets>
+            <device id="00000000-00000000-001527FF-FFDB3896" />
+        </targets>
+        <requests>
+            <device_request target_name="TempUnits">C</device_request>
+        </requests>
+    </data_service>
+</sci_request>
+
+<sci_request version="1.0"><file_system><targets><device id="${userData.device.device_id}"/></targets><commands><get_file path="SystemInformation.txt"/></commands></file_system></sci_request>
