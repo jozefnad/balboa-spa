@@ -2,11 +2,25 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { VitePWA } from 'vite-plugin-pwa' 
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      manifest: {
+        name: 'Balboa BWA',
+        short_name: 'BalboaBWA',
+        theme_color: '#ffffff',
+      },
+      workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
+      }
+    })
   ],
   resolve: {
     alias: {
@@ -14,16 +28,16 @@ export default defineConfig({
     }
   },
   base: '',
-  build: {
-    rollupOptions: {
-      input: {
-        main: './index.html',
-      },
-      output: {
-        entryFileNames: `assets/[name].js`,
-        chunkFileNames: `assets/chunks/[name].js`,
-        assetFileNames: `assets/style/[name].[ext]`,
-      }
-    }
-  }
+  // build: {
+  //   rollupOptions: {
+  //     input: {
+  //       main: './index.html',
+  //     },
+  //     // output: {
+  //     //   entryFileNames: `assets/[name].js`,
+  //     //   chunkFileNames: `assets/chunks/[name].js`,
+  //     //   assetFileNames: `assets/style/[name].[ext]`,
+  //     // }
+  //   }
+  // }
 })
