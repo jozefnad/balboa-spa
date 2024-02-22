@@ -1160,7 +1160,7 @@ button:active {
   }
 
   .filter-active-button.filter-running {
-    animation: colorChange 1.5s infinite;
+    animation: colorChange 3s infinite;
   }
 
   @keyframes colorChange {
@@ -1169,7 +1169,7 @@ button:active {
     }
 
     50% {
-      background-color: #25cc70;
+      background-color: #ffffff;
     }
 
     100% {
