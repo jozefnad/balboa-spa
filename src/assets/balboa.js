@@ -1,4 +1,6 @@
-let balboaToken = null;
+import { ref } from 'vue';
+
+export const balboaToken = ref(null);
 let device_id = null;
 let deviceConfiguration = null;
 
@@ -27,7 +29,7 @@ const BUTTON_MAP = {
 };
 
 export function updateUserData(data) {
-  balboaToken = data.token;
+  balboaToken.value = data.token;
   device_id = data.device.device_id;
 }
 
@@ -74,7 +76,7 @@ export async function login(username, password) {
     }
 
     const data = await response.json();
-    balboaToken = data.token;
+    balboaToken.value = data.token;
     device_id = data.device.device_id;
 
     return data;
@@ -86,7 +88,7 @@ export async function login(username, password) {
 // Function to send a message to the balboa with fetch with options and body with default null
 async function makeSciRequest(body = null) {
   // Check if token exists
-  if (!balboaToken) {
+  if (!balboaToken.value) {
     throw new Error("No token found");
   }
 
@@ -96,7 +98,7 @@ async function makeSciRequest(body = null) {
   const options = {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${balboaToken}`,
+      Authorization: `Bearer ${balboaToken.value}`,
       "Content-Type": "application/xml",
     },
     body: body,
@@ -105,6 +107,10 @@ async function makeSciRequest(body = null) {
   // Make the request and handle potential errors
   const response = await fetch(url, options);
   if (!response.ok) {
+    //if error 401, token is expired set to null
+    if (response.status === 401) {
+      balboaToken.value = null;
+    }
     throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`);
   }
 
@@ -121,6 +127,12 @@ function extractValueFromXMLResponse(response, targetName) {
   const value = xmlDoc.querySelector(targetName)?.textContent;
 
   if (!value) {
+    //extract target error
+    const error = xmlDoc.querySelector("error")?.textContent;
+    if (error) {
+      console.error(`Failed to extract ${targetName} from XML response: ${error}`);
+      throw new Error(`Failed to extract ${targetName} from XML response: ${error}`);
+    }
     throw new Error(`Failed to extract ${targetName} from XML response`);
   }
 
@@ -128,13 +140,16 @@ function extractValueFromXMLResponse(response, targetName) {
 }
 
 // Fetch system information and parse it
-export async function getSystemInformation() {
+export async function getSystemInformation(parsed = true) {
   try {
     const response = await makeSciRequest(
       `<sci_request version="1.0"><file_system><targets><device id="${device_id}"/></targets><commands><get_file path="SystemInformation.txt"/></commands></file_system></sci_request>`
     );
     const value = extractValueFromXMLResponse(response, "data");
     const decodedValue = decode(value);
+    if (!parsed) {
+      return decodedValue;
+    }
     return parseSystemInformation(decodedValue.slice(4));
   } catch (error) {
     console.error(`Failed to get system information: ${error}`);
@@ -162,7 +177,7 @@ export function parseSystemInformation(data) {
 }
 
 // Function to get setup parameters
-export async function getSetupParameters() {
+export async function getSetupParameters(parsed = true) {
   try {
     const xmlRequestBody = `<sci_request version="1.0"><file_system cache="false"><targets><device id="${device_id}" /></targets><commands><get_file path="SetupParameters.txt" /></commands></file_system></sci_request>`;
     const response = await makeSciRequest(xmlRequestBody);
@@ -174,6 +189,9 @@ export async function getSetupParameters() {
 
     const value = extractValueFromXMLResponse(response, "data");
     const decodedValue = decode(value);
+    if (!parsed) {
+      return decodedValue;
+    }
     return parseSetupParameters(decodedValue);
   } catch (error) {
     console.error(error);
@@ -195,11 +213,14 @@ export function parseSetupParameters(data) {
   };
 }
 //FILTER CYCLES
-export async function getFilterCycles() {
+export async function getFilterCycles(parsed = true) {
   const xmlRequestBody = `<sci_request version="1.0"><data_service><targets><device id="${device_id}"/></targets><requests><device_request target_name="Request">Filters</device_request></requests></data_service></sci_request>`;
   const response = await makeSciRequest(xmlRequestBody);
   const value = extractValueFromXMLResponse(response, "device_request");
   const decodedValue = decode(value);
+  if (!parsed) {
+    return decodedValue;
+  }
   return parseFilterCycles(decodedValue);
 }
 
@@ -253,7 +274,7 @@ export function generateFilterCyclesArray(cycles) {
 
 
 //PANEL DATA
-export async function getPanelData() {
+export async function getPanelData(parsed = true) {
   try {
     const xmlRequestBody = `<sci_request version="1.0"><file_system><targets><device id="${device_id}"/></targets><commands><get_file path="PanelUpdate.txt"/></commands></file_system></sci_request>`;
     const response = await makeSciRequest(xmlRequestBody);
@@ -264,8 +285,12 @@ export async function getPanelData() {
 
     const value = extractValueFromXMLResponse(response, "data");
     const decodedValue = decode(value);
-    const parsedValue = parsePanelData(decodedValue);
 
+    if (!parsed) {
+      return decodedValue;
+    }
+    
+    const parsedValue = await parsePanelData(decodedValue);
     return parsedValue;
   } catch (error) {
     console.error(error);
@@ -315,7 +340,13 @@ export async function parsePanelData(data) {
       status: (data[14] & 4) !== 0 ? "High Range" : "Low Range",
     },
     heatMode: heatModes[data[9]] || "None",
-    filterMode: filterModes[data[13] & 12] || "Off",
+    filterMode: {
+      state: {
+        1: (data[13] & 4) !== 0,
+        2: (data[13] & 8) !== 0,
+      },
+      status: filterModes[data[13] & 12] || "Off"
+    },
     pumpStates: {
       1: {
         id: 1,
@@ -380,7 +411,7 @@ export async function parsePanelData(data) {
 }
 
 // This function is used to get the device configuration.
-export async function getDeviceConfiguration() {
+export async function getDeviceConfiguration(parsed = true) {
   // Create the XML request body
   const xmlRequestBody = `<sci_request version="1.0"><file_system><targets><device id="${device_id}"/></targets><commands><get_file path="DeviceConfiguration.txt"/></commands></file_system></sci_request>`;
   
@@ -398,6 +429,9 @@ export async function getDeviceConfiguration() {
   // Decode the value
   const decodedValue = decode(value);
   
+  if (!parsed) {
+    return decodedValue;
+  }
   // Parse the device configuration
   const parsedValue = parseDeviceConfiguration(decodedValue);
   
