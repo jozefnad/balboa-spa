@@ -275,7 +275,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onBeforeMount, watch } from "vue";
 import * as balboa from "../assets/balboa.js";
 
 import Fire from "./Fire.vue";
@@ -295,7 +295,7 @@ const systemInformation = ref(null);
 const panelData = ref(null);
 const filterCycles = ref(null);
 
-onMounted(() => {
+onBeforeMount(() => {
   (async () => {
     const storedBalboaSession = getBalboaSession();
 
