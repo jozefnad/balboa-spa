@@ -2,8 +2,7 @@
 
 This project is a progressive web application (PWA) for controlling Balboa SPA hot tubs. It works as a web, Android, and iOS app.
 
-#### Screenshots
-![Screen Shot](./ScreenShot.jpg | width=100)
+<img src="./ScreenShot.jpg" data-canonical-src="./ScreenShot.jpg" height="550" />
 
 ## Features
 
