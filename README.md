@@ -1,6 +1,31 @@
-# Vue 3 + Vite
+This project is a progressive web application (PWA) for controlling Balboa SPA hot tubs. It works as a web, Android, and iOS app.
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## Features
+
+Users can control:
+
+- Target temperature
+- Time
+- Heat mode
+- Ranges
+- Pumps
+- Blowers
+- Auxs
+- Lights
+- Filter cycles
+- etc.
+
+## Requirements
+
+- Users need to have a WiFi module with the old Balboa app (Spa Control) and have set up Cloud Connect.
+
+## Built With
+
+- Vue.js + Vite
+
+## API
+
+- Balboa Cloud API (bwgapi)
 
 ## Recommended IDE Setup
 
