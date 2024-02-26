@@ -269,7 +269,7 @@
       Model: {{ systemInformation?.modelName }} | SW:
       {{ systemInformation?.softwareId }} | Sync:
       {{ new Date(lastSync).toLocaleString("sk") }}
-      <div>Created by <a href="mailto:jozefnad@gmail.com">Jozef Naď</a></div>
+      <div>Created by <a href="https://github.com/jozefnad/balboa-spa">Jozef Naď</a></div>
     </div>
   </div>
 </template>
