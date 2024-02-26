@@ -5,8 +5,8 @@
   <div v-if="!panelData || !balboaUserData?.token">
     <form class="login-form" @submit.prevent="balboaLogin(auth.username, auth.password)">
       <h1>Balboa BWA</h1>
-      <input type="text" v-model="auth.username" placeholder="Username" />
-      <input type="password" v-model="auth.password" placeholder="Password" required />
+      <input type="text" v-model="auth.username" placeholder="Username" required autocomplete="balboa-cloud-username"/>
+      <input type="password" v-model="auth.password" placeholder="Password" required autocomplete="balboa-cloud-password" />
       <button type="submit">Login</button>
     </form>
   </div>
@@ -73,7 +73,7 @@
             </button>
           </div>
           <div class="temperature">
-            {{ panelData?.temperature !== 255 ? panelData?.temperature : "--" }}°{{
+            {{ panelData?.temperature !== 255 ? panelData?.temperature.toFixed(1) : "--" }}°{{
               panelData?.isCelsius ? "C" : "F"
             }}
           </div>
@@ -94,7 +94,7 @@
               @change="(e) => setTemperature(e.target.value)"
               @mousedown="editingValues = true"
               @mouseup="editingValues = false"
-              @touchstart="editingValues = true"
+              @touchstart.passive="editingValues = true"
               @touchend="editingValues = false"
             />
           </div>
