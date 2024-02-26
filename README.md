@@ -1,3 +1,5 @@
+# Balboa SPA Web (cloud control of your hot tub)
+
 This project is a progressive web application (PWA) for controlling Balboa SPA hot tubs. It works as a web, Android, and iOS app.
 
 ## Features
