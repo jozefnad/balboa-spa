@@ -232,7 +232,7 @@ export async function setFilterCycles(cycles) {
 
 export function parseFilterCycles(data) {
   return {
-    filter1: {
+    1: {
       id: 1,
       startHours: data[4],
       startMinutes: data[5],
@@ -240,7 +240,7 @@ export function parseFilterCycles(data) {
       durationMinutes: data[7],
       active: true,
     },
-    filter2: {
+    2: {
       id: 2,
       startHours: data[8] % 128,
       startMinutes: data[9],
@@ -258,14 +258,14 @@ export function generateFilterCyclesArray(cycles) {
     10,
     191,
     35,
-    cycles.filter1.startHours,
-    cycles.filter1.startMinutes,
-    cycles.filter1.durationHours,
-    cycles.filter1.durationMinutes,
-    cycles.filter2.active ? 128 + cycles.filter2.startHours : cycles.filter2.startHours,
-    cycles.filter2.startMinutes,
-    cycles.filter2.durationHours,
-    cycles.filter2.durationMinutes,
+    cycles[1].startHours,
+    cycles[1].startMinutes,
+    cycles[1].durationHours,
+    cycles[1].durationMinutes,
+    cycles[2].active ? 128 + cycles[2].startHours : cycles[2].startHours,
+    cycles[2].startMinutes,
+    cycles[2].durationHours,
+    cycles[2].durationMinutes,
   ];
   const checksum = calculateChecksum(data);
   data.push(checksum);
