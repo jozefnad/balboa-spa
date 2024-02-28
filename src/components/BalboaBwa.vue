@@ -726,8 +726,8 @@ function closeDialog(id) {
 * {
   user-select: none;
   box-sizing: border-box;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   -webkit-tap-highlight-color: transparent;
+  -moz-tap-highlight-color: transparent;
 }
 
 .loading {
