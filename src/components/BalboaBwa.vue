@@ -824,7 +824,6 @@ button:active {
   width: 100%;
   text-align: center;
   padding: 0.5rem;
-  background-color: #ffffff;
   border-top: 1px solid #ccc;
   font-size: x-small;
 }
@@ -880,7 +879,7 @@ button:active {
     left: 50%;
     min-width: 150%;
     min-height: 150%;
-    background: radial-gradient(rgb(255 255 255), #ffffffcc);
+    background: var(--background-color);
     animation-name: rotate;
     animation-iteration-count: infinite;
     animation-timing-function: linear;
@@ -949,7 +948,7 @@ button:active {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 10;
-  background-color: #fff;
+  background-color: var(--background-color);
   padding: 1rem;
   text-align: center;
   border: 2px solid #ccc;
@@ -1050,7 +1049,6 @@ button:active {
 .temperature-object > .badge > button {
   width: 100%;
   aspect-ratio: 1/1;
-  background-color: #fff;
   border: #cccccc 2px solid;
   border-radius: 50%;
   // padding: .5rem;
@@ -1106,8 +1104,9 @@ button:active {
   cursor: pointer;
   font-size: 1rem;
   font-weight: bold;
-  background: #ffffff;
-  // background: radial-gradient(rgb(255, 255, 255), rgb(218, 95, 97));
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-radius: 50%;
   opacity: 0.5;
   border: 0.5rem solid rgba(218, 95, 97, 0.534);
@@ -1145,8 +1144,8 @@ button:active {
     width: 100%;
     padding: 0.5rem;
     font-weight: bold;
-    color: #000000;
-    background-color: #ffffff;
+    color: var(--color);
+    background-color: var(--background-color);
     opacity: 0.6;
     border: 0.2rem solid;
     border-color: rgb(245 211 213);
@@ -1169,7 +1168,7 @@ button:active {
     }
 
     50% {
-      background-color: #ffffff;
+      background-color: var(--background-color);
     }
 
     100% {
@@ -1209,7 +1208,7 @@ button:active {
   border: 1px solid #ccc;
   border-radius: 0.5rem;
   padding: 0.3rem 0.5rem;
-  background-color: #fff;
+  background-color: var(--background-color);
 
   input[type="time"] {
     width: 0;
