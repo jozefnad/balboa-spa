@@ -1262,19 +1262,22 @@ button:active {
 }
 
 .toaster {
-  font-size: 2rem;
+  font-size: 1.5rem;
   background-color: #85cf7e;
   color: var(--color);
   position: absolute;
   display: none;
   justify-content: center;
   align-items: center;
+  text-align: center;
   opacity: 0;
   // width: fit-content;
   transition: opacity 0.5s linear;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 5%;
+  right: 0;
+  // top: 50%;
+  // left: 50%;
+  // transform: translate(-50%, -50%);
   
   padding: 1rem;
   border-radius: 1rem;
