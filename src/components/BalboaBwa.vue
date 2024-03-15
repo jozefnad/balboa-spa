@@ -73,7 +73,7 @@
             </button>
           </div>
           <div class="temperature">
-            {{ panelData?.temperature !== 255 ? panelData?.temperature.toFixed(1) : "--" }}°{{
+            {{ panelData?.temperature !== 255 ? panelData?.temperature : "--" }}°{{
               panelData?.isCelsius ? "C" : "F"
             }}
           </div>
@@ -169,7 +169,7 @@
     <div class="controlers">
       <button
         class="device-button"
-        :class="{ active: panelData?.circPump.state }"
+        :class="{ 'active animate': panelData?.circPump.state }"
         @click=""
         v-if="panelData?.circPump.present"
       >
@@ -177,7 +177,7 @@
       </button>
       <button
         class="device-button"
-        :class="{ active: panelData?.blowerState.state }"
+        :class="{ 'active animate': panelData?.blowerState.state }"
         @click="updateBlowerState(!panelData?.blowerState.state)"
         v-if="myBlower.present"
       >
@@ -186,7 +186,7 @@
 
       <button
         class="device-button"
-        :class="{ active: aux.state }"
+        :class="{ 'active animate': aux.state }"
         @click="updateAuxState(aux.id, !aux.state)"
         v-for="aux in myAuxs"
       >
@@ -195,7 +195,7 @@
 
       <button
         class="device-button"
-        :class="{ active: pump.state }"
+        :class="{ 'active animate': pump.state }"
         @click="updatePumpState(pump.id, !pump.state)"
         v-for="pump in myPumps"
       >
@@ -271,6 +271,10 @@
       {{ new Date(lastSync).toLocaleString("sk") }}
       <div>Created by <a href="https://github.com/jozefnad/balboa-spa">Jozef Naď</a></div>
     </div>
+  </div>
+
+  <div class="toaster">
+    UPDATED
   </div>
 </template>
 
@@ -641,6 +645,7 @@ async function updateFilterCycles() {
     const response = await balboa.setFilterCycles(filterCyclesArray);
     await getFilterCycles();
     loading.value = false;
+    showToaster("Filter cycles updated!");
   } catch (error) {
     console.error("Error updating filter cycles:", error);
     await getFilterCycles();
@@ -711,6 +716,24 @@ function updateFilterTimes(filter) {
     }
   }
 }
+
+function showToaster(text) {
+  const toaster = document.querySelector(".toaster");
+  if (!toaster) return;  // Exit early if the element doesn't exist
+  toaster.textContent = text || "UPDATED";
+
+  toaster.style.display = "flex";
+
+    toaster.style.opacity = 1;
+
+    setTimeout(() => {
+      toaster.style.opacity = 0;
+      setTimeout(() => {
+        toaster.style.display = "none";
+      }, 500);
+    }, 500);
+}
+
 
 function showDialog(id) {
   const dialog = document.querySelector(`[${id}]`);
@@ -1021,6 +1044,7 @@ button:active {
 }
 
 .target-temperature {
+  width: 50%;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -1035,6 +1059,10 @@ button:active {
   background-color: transparent;
   border: none;
 }
+.target-temperature input[type="range"] {
+  width: -webkit-fill-available;
+}
+
 
 .heating {
   position: absolute;
@@ -1110,6 +1138,20 @@ button:active {
   border-radius: 50%;
   opacity: 0.5;
   border: 0.5rem solid rgba(218, 95, 97, 0.534);
+}
+.device-button.active {
+  opacity: 1;
+  border: 0.5rem solid #40b1bf;
+  // background-color: #40b1bf20;
+}
+
+.device-button.active.animate {
+  animation: activeDeviceAnimation 1.5s infinite;
+}
+
+@keyframes activeDeviceAnimation {
+  0%, 100% { border: 0.5rem solid #40b1bf;}
+  50% { border: 0.5rem solid #40b1bfaa; }
 }
 
 .filter-cycles {
@@ -1219,10 +1261,23 @@ button:active {
   }
 }
 
-.device-button.active {
-  opacity: 1;
-  border: 0.5rem solid #40b1bf;
-  background-color: #40b1bf20;
+.toaster {
+  font-size: 2rem;
+  background-color: #85cf7e;
+  color: var(--color);
+  position: absolute;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  // width: fit-content;
+  transition: opacity 0.5s linear;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  
+  padding: 1rem;
+  border-radius: 1rem;
 }
 
 .hide-arrows::-webkit-inner-spin-button,
