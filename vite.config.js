@@ -16,8 +16,8 @@ export default defineConfig({
         theme_color: '#ffffff',
       },
       workbox: {
-        skipWaiting: true,
-        clientsClaim: true,
+        // skipWaiting: true,
+        // clientsClaim: true,
         cleanupOutdatedCaches: true,
       }
     })
