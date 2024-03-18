@@ -16,8 +16,8 @@ export default defineConfig({
         theme_color: '#ffffff',
       },
       workbox: {
-        // skipWaiting: true,
-        // clientsClaim: true,
+        skipWaiting: true,
+        clientsClaim: true,
         cleanupOutdatedCaches: true,
       }
     })
@@ -28,16 +28,16 @@ export default defineConfig({
     }
   },
   base: '',
-  // build: {
-  //   rollupOptions: {
-  //     input: {
-  //       main: './index.html',
-  //     },
-  //     // output: {
-  //     //   entryFileNames: `assets/[name].js`,
-  //     //   chunkFileNames: `assets/chunks/[name].js`,
-  //     //   assetFileNames: `assets/style/[name].[ext]`,
-  //     // }
-  //   }
-  // }
+  build: {
+    rollupOptions: {
+      input: {
+        main: './index.html',
+      },
+      output: {
+        entryFileNames: `assets/[name].js`,
+        chunkFileNames: `assets/chunks/[name].js`,
+        assetFileNames: `assets/style/[name].[ext]`,
+      }
+    }
+  }
 })
