@@ -352,6 +352,12 @@
       <div>
         Created by
         <a href="https://github.com/jozefnad/balboa-spa">Jozef Naď</a>
+        <span id="installAppArea" v-If="deferredPrompt">
+          |
+          <button id="installAppButton" @click="installAsApplication()">
+            INSTALL THIS APP
+          </button>
+        </span>
       </div>
     </div>
   </div>
@@ -364,6 +370,25 @@ import { ref, computed, onBeforeMount, watch } from "vue";
 import * as balboa from "../assets/balboa.js";
 
 import Fire from "./Fire.vue";
+
+let deferredPrompt = ref(null);
+window.addEventListener("beforeinstallprompt", (e) => {
+  deferredPrompt.value = e;
+});
+
+function installAsApplication() {
+  if (deferredPrompt.value) {
+    deferredPrompt.value.prompt();
+    deferredPrompt.value.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === "accepted") {
+        console.log("User accepted the A2HS prompt");
+      } else {
+        console.log("User dismissed the A2HS prompt");
+      }
+      deferredPrompt.value = null;
+    });
+  }
+}
 
 const timeouts = {};
 
@@ -857,6 +882,18 @@ function closeDialog(id) {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
   -moz-tap-highlight-color: transparent;
+}
+
+#installAppArea {
+  display: inline-block;
+  #installAppButton {
+    background-color: #40b1bf;
+    color: white;
+    font-size: x-small;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+  }
 }
 
 .loading {
