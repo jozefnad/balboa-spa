@@ -14,6 +14,13 @@ export default defineConfig({
         name: 'Balboa BWA',
         short_name: 'BalboaBWA',
         theme_color: '#ffffff',
+        icons: [
+          {
+            src: './src/assets/hottubbing.webp',
+            sizes: '512x512',
+            type: 'image/webp',
+          },
+        ],
       },
       workbox: {
         skipWaiting: true,
