@@ -384,7 +384,6 @@ onBeforeMount(() => {
   (async () => {
     const storedBalboaSession = getBalboaSession();
 
-    console.log("storedBalboaSession", storedBalboaSession);
     if (storedBalboaSession?.token && storedBalboaSession?.device.device_id) {
       balboa.updateUserData(storedBalboaSession);
       balboaUserData.value = storedBalboaSession;
@@ -407,12 +406,10 @@ onBeforeMount(() => {
 // Event listener for visibility change
 document.addEventListener("visibilitychange", function () {
   if (document.hidden) {
-    console.log("hidden");
     for (const key in timeouts) {
       clearTimeout(timeouts[key]);
     }
   } else {
-    console.log("visible");
     if (balboa.balboaToken) {
       return getBalboaData();
     }
@@ -480,7 +477,6 @@ async function balboaLogin(username, password) {
   try {
     loading.value = true;
     const response = await balboa.login(username, password);
-    console.log(response);
     localStorage.setItem("balboaSession", JSON.stringify(response));
     balboaUserData.value = response;
     loading.value = false;
@@ -525,7 +521,6 @@ async function getPanelData() {
 async function getFilterCycles() {
   try {
     const response = await balboa.getFilterCycles();
-    console.log(response);
     let updatedResponse = {};
     for (const key in response) {
       let filter = { ...response[key] };
@@ -551,7 +546,6 @@ async function getFilterCycles() {
 async function getSetupParameters() {
   try {
     const response = await balboa.getSetupParameters();
-    console.log(response);
     setupParameters.value = response;
   } catch (error) {
     console.error("Error getting setup parameters:", error);
@@ -562,7 +556,6 @@ async function getSetupParameters() {
 async function getSystemInformation() {
   try {
     const response = await balboa.getSystemInformation();
-    console.log(response);
     systemInformation.value = response;
   } catch (error) {
     console.error("Error getting system information:", error);
@@ -574,7 +567,6 @@ async function setSystemTime(hours, minutes) {
   try {
     loading.value = true;
     const response = await balboa.setSystemTime(hours, minutes);
-    console.log(response);
     await getPanelData();
     closeDialog("system-time-modal");
     loading.value = false;
@@ -590,7 +582,6 @@ async function setTimeFormat(is24HourTime) {
     loading.value = true;
     clearTimeout(timeouts.getPanelData);
     const response = await balboa.setTimeFormat(is24HourTime);
-    console.log(response);
     await getPanelData();
     closeDialog("system-time-modal");
     loading.value = false;
@@ -607,7 +598,6 @@ async function setHeatMode(state) {
     loading.value = true;
     clearTimeout(timeouts.getPanelData);
     const response = await balboa.setHeatMode(state);
-    console.log(response);
     await getPanelData();
     loading.value = false;
   } catch (error) {
@@ -623,7 +613,6 @@ async function setTemperature(temperature) {
     loading.value = true;
     clearTimeout(timeouts.getPanelData);
     const response = await balboa.setTemperature(temperature);
-    console.log(response);
     await getPanelData();
     loading.value = false;
   } catch (error) {
@@ -662,7 +651,6 @@ async function setTemperatureRange(state) {
     loading.value = true;
     clearTimeout(timeouts.getPanelData);
     const response = await balboa.setTemperatureRange(state);
-    console.log(response);
     await getPanelData();
     loading.value = false;
   } catch (error) {
@@ -677,7 +665,6 @@ async function setTempUnits(state) {
     loading.value = true;
     clearTimeout(timeouts.getPanelData);
     const response = await balboa.setTempUnits(state);
-    console.log(response);
     await getPanelData();
     loading.value = false;
   } catch (error) {
@@ -740,7 +727,6 @@ async function updateLightState(id, state) {
     const response = await balboa.updateLightState(id, state);
     await getPanelData();
     const panelData = await balboa.getPanelData(false);
-    console.log(panelData);
     loading.value = false;
   } catch (error) {
     console.error("Error updating light state:", error);
