@@ -6,8 +6,12 @@ let deviceConfiguration = null;
 
 // Button mappings for the Balboa API
 const BUTTON_MAP = {
+  //add normal operation 0x01
+  NormalOperation: 1,
+  SoakMode: 29, //all pumps off
+  HoldMode: 60,
   TempRange: 80,
-  HeatMode: 81,
+  HeatMode: 81,  
   pumps: {
     1: 4, // Pump 1 maps to Balboa API Button #4
     2: 5, // Pump 2 maps to Balboa API Button #5
@@ -320,6 +324,7 @@ export async function parsePanelData(data) {
 
   // Construct the panel data object
   const panelData = {
+    spaState: data[4] === 0 ? "Running" : data[4] === 1 ? "Initializing" : data[4] === 5 ? "Hold Mode" : data[4] === 20 ? "A/B Temps ON" : data[4] === 23 ? "Test Mode" : "Unknown",
     is24HourTime: (data[13] & 2) !== 0,
     hours: data[7],
     minutes: data[8],
@@ -338,6 +343,10 @@ export async function parsePanelData(data) {
     range: {
       state: (data[14] & 4) !== 0,
       status: (data[14] & 4) !== 0 ? "High Range" : "Low Range",
+    },
+    holdMode: {
+      state:data[4] === 5,
+      duration: data[4] === 5 ? data[11] : null,
     },
     heatMode: heatModes[data[9]] || "None",
     filterMode: {
@@ -718,6 +727,31 @@ export async function setTemperatureRange(rangeHigh) {
 
   // Generate the XML request body
   const xmlRequestBody = generateButtonSciXML(BUTTON_MAP.TempRange);
+  
+  // Make the SCI request
+  const response = await makeSciRequest(xmlRequestBody);
+  
+  // Return the response
+  return response;
+}
+
+// This function is used to set the hold mode.
+export async function setHoldMode(setToHold) {
+  // Get the current panel data
+  const currentPanelData = await getPanelData();
+  
+  // If there's no panel data, throw an error
+  if (!currentPanelData) {
+    throw new Error("No panel data");
+  }
+  
+  // If the hold mode is already the desired mode, return a message
+  // if ((setToHold && currentPanelData.spaState === "Hold Mode") || (!setToHold && currentPanelData.spaState !== "Hold Mode")) {
+  //   return "Hold mode already set to that value";
+  // }
+
+  // Generate the XML request body
+  const xmlRequestBody = generateButtonSciXML(currentPanelData.holdMode.state ? BUTTON_MAP.NormalOperation : BUTTON_MAP.HoldMode);
   
   // Make the SCI request
   const response = await makeSciRequest(xmlRequestBody);
