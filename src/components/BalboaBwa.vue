@@ -3,10 +3,25 @@
     <span class="spinner"></span>
   </div>
   <div v-if="!panelData || !balboaUserData?.token">
-    <form class="login-form" @submit.prevent="balboaLogin(auth.username, auth.password)">
+    <form
+      class="login-form"
+      @submit.prevent="balboaLogin(auth.username, auth.password)"
+    >
       <h1>Balboa BWA</h1>
-      <input type="text" v-model="auth.username" placeholder="Username" required autocomplete="balboa-cloud-username"/>
-      <input type="password" v-model="auth.password" placeholder="Password" required autocomplete="balboa-cloud-password" />
+      <input
+        type="text"
+        v-model="auth.username"
+        placeholder="Username"
+        required
+        autocomplete="balboa-cloud-username"
+      />
+      <input
+        type="password"
+        v-model="auth.password"
+        placeholder="Password"
+        required
+        autocomplete="balboa-cloud-password"
+      />
       <button type="submit">Login</button>
     </form>
   </div>
@@ -25,7 +40,8 @@
             type="time"
             step="900"
             @change="
-              (e) => setSystemTime(...Object.values(getHoursMinutes(e.target.value)))
+              (e) =>
+                setSystemTime(...Object.values(getHoursMinutes(e.target.value)))
             "
             onfocus="this.showPicker()"
           />
@@ -41,30 +57,48 @@
       <div class="time-format">
         Time format:
         <span class="toggle-button">
-          <button @click="setTimeFormat(false)" :disabled="!panelData.is24HourTime">
+          <button
+            @click="setTimeFormat(false)"
+            :disabled="!panelData.is24HourTime"
+          >
             12
           </button>
-          <button @click="setTimeFormat(true)" :disabled="panelData.is24HourTime">
+          <button
+            @click="setTimeFormat(true)"
+            :disabled="panelData.is24HourTime"
+          >
             24
           </button>
         </span>
       </div>
-      <button class="close-modal" @click="closeDialog('system-time-modal')">Close</button>
+      <button class="close-modal" @click="closeDialog('system-time-modal')">
+        Close
+      </button>
     </div>
     <div class="temperature-object">
       <div
         class="waves"
+        :class="{ 'animation-none': panelData?.holdMode?.state }"
         :style="
-          panelData.heating.state
+          panelData?.holdMode?.state
+            ? 'background-color: #a1a1a1;'
+            : panelData.heating.state
             ? 'background-color: rgb(220,100,100);'
             : 'background-color: rgb(103,180,250);'
         "
       >
         <div class="container">
           <div class="time">
-            <button class="button-icon-only" @click="showDialog('system-time-modal')">
+            <button
+              class="button-icon-only"
+              @click="showDialog('system-time-modal')"
+            >
               {{ formatTime(`${panelData?.hours}:${panelData?.minutes}`) }}
-              <svg xmlns="http://www.w3.org/2000/svg" width="2rem" viewBox="0 0 24 24">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="2rem"
+                viewBox="0 0 24 24"
+              >
                 <path
                   fill="currentColor"
                   d="M13 14h-2V8h2v6m2-13H9v2h6V1M5 13a6.995 6.995 0 0 1 13.79-1.66l.6-.6c.32-.32.71-.53 1.11-.64a8.59 8.59 0 0 0-1.47-2.71l1.42-1.42c-.45-.51-.9-.97-1.41-1.41L17.62 6c-1.55-1.26-3.5-2-5.62-2a9 9 0 0 0-9 9c0 4.63 3.5 8.44 8 8.94v-2.02c-3.39-.49-6-3.39-6-6.92m8 6.96V22h2.04l6.13-6.12l-2.04-2.05L13 19.96m9.85-6.49l-1.32-1.32c-.2-.2-.53-.2-.72 0l-.98.98l2.04 2.04l.98-.98c.2-.19.2-.52 0-.72Z"
@@ -73,17 +107,49 @@
             </button>
           </div>
           <div class="temperature">
-            {{ panelData?.temperature !== 255 ? panelData?.temperature : "--" }}°{{
-              panelData?.isCelsius ? "C" : "F"
-            }}
+            <div>
+              {{
+                panelData?.temperature !== 255
+                  ? panelData.isCelsius
+                    ? parseFloat(panelData.temperature).toFixed(1)
+                    : panelData.temperature
+                  : "--"
+              }}°{{ panelData?.isCelsius ? "C" : "F" }}
+            </div>
+            <div style="font-size: small" v-if="panelData.holdMode.state">
+              Hold mode: ~{{ panelData.holdMode.duration }} min ⏳
+            </div>
           </div>
           <div class="target-temperature">
-            <span style="font-size: x-small"> Target temperature </span>
-            <span>
-              {{ panelData.targetTemperature }} °{{
-                panelData?.isCelsius ? "C" : "F"
-              }}</span
+            <span style="font-size: small"> Target temperature</span>
+            <span
+              style="
+                font-size: 2rem;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+              "
             >
+              <button
+                class="button-icon-only rounded"
+                @click="decreaseTemperature()"
+              >
+                -
+              </button>
+              <span style="margin: 0 0.5rem">
+                {{
+                  panelData.isCelsius
+                    ? parseFloat(panelData.targetTemperature).toFixed(1)
+                    : panelData.targetTemperature
+                }}°{{ panelData?.isCelsius ? "C" : "F" }}
+              </span>
+              <button
+                class="button-icon-only rounded"
+                @click="increaseTemperature()"
+              >
+                +
+              </button>
+            </span>
             <input
               type="range"
               :step="panelData.isCelsius ? '0.5' : '1'"
@@ -97,6 +163,11 @@
               @touchstart.passive="editingValues = true"
               @touchend="editingValues = false"
             />
+            <!-- <span style="font-size: x-small">({{ rangeTemps?.min }}°{{
+                  panelData?.isCelsius ? "C" : "F"
+                }} - {{ rangeTemps?.max }}°{{
+                  panelData?.isCelsius ? "C" : "F"
+                }})</span> -->
           </div>
         </div>
       </div>
@@ -149,9 +220,18 @@
           </svg>
         </button>
       </div>
+
+      <div
+        class="hold-mode badge"
+        :class="{ active: panelData.holdMode.state }"
+      >
+        <button @click="balboa.setHoldMode(!panelData.holdMode)">Hold</button>
+      </div>
       <div class="heat-mode badge">
         <button
-          @click="setHeatMode(!panelData.heatMode.toLowerCase().includes('ready'))"
+          @click="
+            setHeatMode(!panelData.heatMode.toLowerCase().includes('ready'))
+          "
           :title="panelData?.heatMode"
         >
           {{ panelData?.heatMode }}
@@ -269,13 +349,14 @@
       Model: {{ systemInformation?.modelName }} | SW:
       {{ systemInformation?.softwareId }} | Sync:
       {{ new Date(lastSync).toLocaleString("sk") }}
-      <div>Created by <a href="https://github.com/jozefnad/balboa-spa">Jozef Naď</a></div>
+      <div>
+        Created by
+        <a href="https://github.com/jozefnad/balboa-spa">Jozef Naď</a>
+      </div>
     </div>
   </div>
 
-  <div class="toaster">
-    UPDATED
-  </div>
+  <div class="toaster">UPDATED</div>
 </template>
 
 <script setup>
@@ -350,7 +431,9 @@ const myLights = computed(() => {
 });
 
 const myBlower = computed(() => {
-  return panelData.value?.blowerState.present ? panelData.value?.blowerState : [];
+  return panelData.value?.blowerState.present
+    ? panelData.value?.blowerState
+    : [];
 });
 
 const myAuxs = computed(() => {
@@ -446,7 +529,10 @@ async function getFilterCycles() {
     let updatedResponse = {};
     for (const key in response) {
       let filter = { ...response[key] };
-      filter.startTime = getFilterStartTime(filter.startHours, filter.startMinutes);
+      filter.startTime = getFilterStartTime(
+        filter.startHours,
+        filter.startMinutes
+      );
       filter.endTime = getFilterEndTime(
         filter.startHours,
         filter.startMinutes,
@@ -547,6 +633,30 @@ async function setTemperature(temperature) {
   }
 }
 
+function decreaseTemperature() {
+  if (panelData.value.targetTemperature > rangeTemps.value.min) {
+    editingValues.value = true;
+    clearTimeout(timeouts.setTemperature);
+    panelData.value.targetTemperature -= panelData.value.isCelsius ? 0.5 : 1;
+    timeouts.setTemperature = setTimeout(() => {
+      setTemperature(panelData.value.targetTemperature);
+      editingValues.value = false;
+    }, 500);
+  }
+}
+
+function increaseTemperature() {
+  if (panelData.value.targetTemperature < rangeTemps.value.max) {
+    editingValues.value = true;
+    clearTimeout(timeouts.setTemperature);
+    panelData.value.targetTemperature += panelData.value.isCelsius ? 0.5 : 1;
+    timeouts.setTemperature = setTimeout(() => {
+      setTemperature(panelData.value.targetTemperature);
+      editingValues.value = false;
+    }, 500);
+  }
+}
+
 async function setTemperatureRange(state) {
   try {
     loading.value = true;
@@ -629,6 +739,8 @@ async function updateLightState(id, state) {
     clearTimeout(timeouts.getPanelData);
     const response = await balboa.updateLightState(id, state);
     await getPanelData();
+    const panelData = await balboa.getPanelData(false);
+    console.log(panelData);
     loading.value = false;
   } catch (error) {
     console.error("Error updating light state:", error);
@@ -641,7 +753,9 @@ async function updateLightState(id, state) {
 async function updateFilterCycles() {
   try {
     loading.value = true;
-    const filterCyclesArray = balboa.generateFilterCyclesArray(filterCycles.value);
+    const filterCyclesArray = balboa.generateFilterCyclesArray(
+      filterCycles.value
+    );
     const response = await balboa.setFilterCycles(filterCyclesArray);
     await getFilterCycles();
     loading.value = false;
@@ -676,15 +790,22 @@ function getFilterStartTime(startHours, startMinutes) {
 }
 
 // This function is used to get the filter end time.
-function getFilterEndTime(startHours, startMinutes, durationHours, durationMinutes) {
+function getFilterEndTime(
+  startHours,
+  startMinutes,
+  durationHours,
+  durationMinutes
+) {
   const start = new Date(new Date().setHours(startHours, startMinutes, 0, 0));
   const end = new Date(
-    start.getTime() + durationHours * 60 * 60 * 1000 + durationMinutes * 60 * 1000
+    start.getTime() +
+      durationHours * 60 * 60 * 1000 +
+      durationMinutes * 60 * 1000
   );
-  return `${end
-    .getHours()
+  return `${end.getHours().toString().padStart(2, "0")}:${end
+    .getMinutes()
     .toString()
-    .padStart(2, "0")}:${end.getMinutes().toString().padStart(2, "0")}`;
+    .padStart(2, "0")}`;
 }
 
 function updateFilterTimes(filter) {
@@ -719,21 +840,20 @@ function updateFilterTimes(filter) {
 
 function showToaster(text) {
   const toaster = document.querySelector(".toaster");
-  if (!toaster) return;  // Exit early if the element doesn't exist
+  if (!toaster) return; // Exit early if the element doesn't exist
   toaster.textContent = text || "UPDATED";
 
   toaster.style.display = "flex";
 
-    toaster.style.opacity = 1;
+  toaster.style.opacity = 1;
 
+  setTimeout(() => {
+    toaster.style.opacity = 0;
     setTimeout(() => {
-      toaster.style.opacity = 0;
-      setTimeout(() => {
-        toaster.style.display = "none";
-      }, 500);
+      toaster.style.display = "none";
     }, 500);
+  }, 500);
 }
-
 
 function showDialog(id) {
   const dialog = document.querySelector(`[${id}]`);
@@ -795,6 +915,11 @@ button {
 
 button:active {
   transform: scale(0.95);
+}
+
+.rounded {
+  border-radius: 50%;
+  aspect-ratio: 1/1;
 }
 
 .login-form {
@@ -903,22 +1028,30 @@ button:active {
     min-width: 150%;
     min-height: 150%;
     background: var(--background-color);
+    transform: translate(-50%, 0) rotateZ(0deg);
     animation-name: rotate;
     animation-iteration-count: infinite;
     animation-timing-function: linear;
   }
 
   &:before {
-    bottom: 35%;
+    bottom: 37%;
     border-radius: 45%;
     animation-duration: 10s;
   }
 
   &:after {
-    bottom: 30%;
+    bottom: 32%;
     opacity: 0.5;
     border-radius: 47%;
     animation-duration: 10s;
+  }
+}
+
+.waves.animation-none {
+  &:before,
+  &:after {
+    animation: none;
   }
 }
 
@@ -1039,6 +1172,7 @@ button:active {
   font-weight: bold;
   flex-grow: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
@@ -1053,6 +1187,16 @@ button:active {
   font-size: 1.5rem;
 }
 
+.target-temperature button {
+  font-size: 1.7rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: #cccccc 2px solid;
+}
+
 .target-temperature input[type="number"] {
   width: 2rem;
   font-size: 1.5rem;
@@ -1062,7 +1206,6 @@ button:active {
 .target-temperature input[type="range"] {
   width: -webkit-fill-available;
 }
-
 
 .heating {
   position: absolute;
@@ -1116,6 +1259,21 @@ button:active {
   // button {}
 }
 
+.hold-mode {
+  position: absolute;
+  z-index: 1;
+  bottom: 20%;
+  right: 0rem;
+}
+.hold-mode.badge {
+  width: min-content;
+}
+.hold-mode.active {
+  button {
+    animation: activeDeviceAnimation 1.5s infinite;
+  }
+}
+
 .controlers {
   display: flex;
   flex-wrap: wrap;
@@ -1150,8 +1308,13 @@ button:active {
 }
 
 @keyframes activeDeviceAnimation {
-  0%, 100% { border: 0.5rem solid #40b1bf;}
-  50% { border: 0.5rem solid #40b1bfaa; }
+  0%,
+  100% {
+    border-color: #40b1bf;
+  }
+  50% {
+    border-color: #40b1bfaa;
+  }
 }
 
 .filter-cycles {
@@ -1278,7 +1441,7 @@ button:active {
   // top: 50%;
   // left: 50%;
   // transform: translate(-50%, -50%);
-  
+
   padding: 1rem;
   border-radius: 1rem;
 }
