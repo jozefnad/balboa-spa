@@ -16,7 +16,7 @@ export default defineConfig({
         theme_color: '#ffffff',
         icons: [
           {
-            src: './src/assets/hottubbing.webp',
+            src: 'assets/style/hottubbing.webp',
             sizes: '512x512',
             type: 'image/webp',
           },
