@@ -688,7 +688,7 @@ export async function setTemperature(temperature) {
   }
   
   // If the temperature is already the desired temperature, return a message
-  if (temperature === currentPanelData.temperature) {
+  if (temperature === currentPanelData.targetTemperature) {
     return "Temperature already set to that value";
   }
   
