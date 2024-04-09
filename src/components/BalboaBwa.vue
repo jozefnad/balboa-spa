@@ -535,7 +535,7 @@ async function getPanelData() {
       panelData.value = response;
       lastSync.value = new Date();
     }
-    timeouts.getPanelData = setTimeout(getPanelData, 1000);
+    // timeouts.getPanelData = setTimeout(getPanelData, 1000);
   } catch (error) {
     console.error("Error getting panel data:", error);
     if (!balboa.balboaToken.value) {
@@ -642,11 +642,12 @@ async function setTemperature(temperature) {
     clearTimeout(timeouts.getPanelData);
     const response = await balboa.setTemperature(temperature);
     await getPanelData();
-    loading.value = false;
   } catch (error) {
     console.error("Error setting temperature:", error);
     await getPanelData();
+  } finally {
     loading.value = false;
+    editingValues.value = false;
   }
 }
 
@@ -657,7 +658,6 @@ function decreaseTemperature() {
     panelData.value.targetTemperature -= panelData.value.isCelsius ? 0.5 : 1;
     timeouts.setTemperature = setTimeout(() => {
       setTemperature(panelData.value.targetTemperature);
-      editingValues.value = false;
     }, 500);
   }
 }
@@ -669,8 +669,7 @@ function increaseTemperature() {
     panelData.value.targetTemperature += panelData.value.isCelsius ? 0.5 : 1;
     timeouts.setTemperature = setTimeout(() => {
       setTemperature(panelData.value.targetTemperature);
-      editingValues.value = false;
-    }, 500);
+   }, 500);
   }
 }
 
