@@ -352,8 +352,7 @@
       <div>
         Created by
         <a href="https://github.com/jozefnad/balboa-spa">Jozef Naď</a>
-        <span id="installAppArea" v-If="deferredPrompt">
-          |
+        <span id="installAppArea" v-If="deferredPrompt && !isInStandaloneMode">
           <button id="installAppButton" @click="installAsApplication()">
             INSTALL THIS APP
           </button>
@@ -370,6 +369,8 @@ import { ref, computed, onBeforeMount, watch } from "vue";
 import * as balboa from "../assets/balboa.js";
 
 import Fire from "./Fire.vue";
+
+const isInStandaloneMode = ref(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://'));
 
 let deferredPrompt = ref(null);
 window.addEventListener("beforeinstallprompt", (e) => {
