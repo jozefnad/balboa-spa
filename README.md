@@ -11,6 +11,7 @@ Users can control:
 - Target temperature
 - Time
 - Heat mode
+- Hold mode
 - Ranges
 - Pumps
 - Blowers
