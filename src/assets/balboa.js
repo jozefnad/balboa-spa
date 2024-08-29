@@ -2,8 +2,10 @@ import { ref } from 'vue';
 
 var baseURL;
 
-if (import.meta.env.VITE_LOCALHOSTING) {
+if (import.meta.env.VITE_LOCAL_HOSTING) {
   baseURL = window.location.origin;
+} else if (import.meta.env.VITE_HOSTING_URL) {
+  baseURL = import.meta.env.VITE_HOSTING_URL;
 } else {
   baseURL = `https://bwgapi.balboawater.com`;
 }
