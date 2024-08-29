@@ -1,2 +1,2 @@
-# This allows specifying the URL of the SPA cloud service's.  Update with your local hosting, and rename to .env
-VITE_URL=http://localhost:3000
+# This setting will assume that the cloud backend is the same as the site hosting server.  To enable rename to .env and rebuild.
+VITE_LOCALHOSTING=Enabled
