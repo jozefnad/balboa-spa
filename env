@@ -1,0 +1,5 @@
+# This setting will assume that the cloud backend is the same as the site hosting server.  To enable rename to .env and rebuild.
+VITE_LOCAL_HOSTING=Enabled
+# This setting will allow specifiying the cloud backend address.
+#VITE_HOSTING_URL=http://cloudservice.com
+# Please only uncomment one setting

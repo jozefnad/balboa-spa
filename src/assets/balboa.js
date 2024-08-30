@@ -1,5 +1,15 @@
 import { ref } from 'vue';
 
+var baseURL;
+
+if (import.meta.env.VITE_LOCAL_HOSTING) {
+  baseURL = window.location.origin;
+} else if (import.meta.env.VITE_HOSTING_URL) {
+  baseURL = import.meta.env.VITE_HOSTING_URL;
+} else {
+  baseURL = `https://bwgapi.balboawater.com`;
+}
+
 export const balboaToken = ref(null);
 let device_id = null;
 let deviceConfiguration = null;
@@ -11,7 +21,7 @@ const BUTTON_MAP = {
   SoakMode: 29, //all pumps off
   HoldMode: 60,
   TempRange: 80,
-  HeatMode: 81,  
+  HeatMode: 81,
   pumps: {
     1: 4, // Pump 1 maps to Balboa API Button #4
     2: 5, // Pump 2 maps to Balboa API Button #5
@@ -67,7 +77,7 @@ export function calculateChecksum(data) {
 
 //FUNCTIONS
 export async function login(username, password) {
-  const API_URL = 'https://bwgapi.balboawater.com/users/login';
+  const API_URL = baseURL + `/users/login`;
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
@@ -96,7 +106,7 @@ async function makeSciRequest(body = null) {
     throw new Error("No token found");
   }
 
-  const url = `https://bwgapi.balboawater.com/devices/sci`;
+  const url = baseURL + `/devices/sci`;
 
   // Set up fetch options
   const options = {
@@ -293,7 +303,7 @@ export async function getPanelData(parsed = true) {
     if (!parsed) {
       return decodedValue;
     }
-    
+
     const parsedValue = await parsePanelData(decodedValue);
     return parsedValue;
   } catch (error) {
@@ -306,7 +316,7 @@ export async function getPanelData(parsed = true) {
 // This function is used to parse the panel data.
 export async function parsePanelData(data) {
   // Check if deviceConfiguration is null
-  if(!deviceConfiguration){
+  if (!deviceConfiguration) {
     try {
       // Fetch device configuration if not already available
       deviceConfiguration = await getDeviceConfiguration();
@@ -345,7 +355,7 @@ export async function parsePanelData(data) {
       status: (data[14] & 4) !== 0 ? "High Range" : "Low Range",
     },
     holdMode: {
-      state:data[4] === 5,
+      state: data[4] === 5,
       duration: data[4] === 5 ? data[11] : null,
     },
     heatMode: heatModes[data[9]] || "None",
@@ -363,7 +373,7 @@ export async function parsePanelData(data) {
         status: data[15] === 1 ? data[14] === 0 ? "Low" : "Low heat" : data[15] === 2 ? data[14] === 0 ? "High" : "High heat" : "Off",
         present: deviceConfiguration.pumps[1].present,
       },
-      ...Array.from({length: 5}, (_, i) => i + 2).reduce((pumps, i) => {
+      ...Array.from({ length: 5 }, (_, i) => i + 2).reduce((pumps, i) => {
         const pumpState = ["off", "low", "high"][(data[15] >> ((i - 1) * 2)) & 3];
         pumps[i] = {
           id: i,
@@ -423,27 +433,27 @@ export async function parsePanelData(data) {
 export async function getDeviceConfiguration(parsed = true) {
   // Create the XML request body
   const xmlRequestBody = `<sci_request version="1.0"><file_system><targets><device id="${device_id}"/></targets><commands><get_file path="DeviceConfiguration.txt"/></commands></file_system></sci_request>`;
-  
+
   // Make the SCI request
   const response = await makeSciRequest(xmlRequestBody);
-  
+
   // If there's no response, throw an error
   if (!response) {
     throw new Error("No response from device configuration");
   }
-  
+
   // Extract the value from the XML response
   const value = extractValueFromXMLResponse(response, "data");
-  
+
   // Decode the value
   const decodedValue = decode(value);
-  
+
   if (!parsed) {
     return decodedValue;
   }
   // Parse the device configuration
   const parsedValue = parseDeviceConfiguration(decodedValue);
-  
+
   // Return the parsed value
   return parsedValue;
 }
@@ -472,7 +482,7 @@ export function parseDeviceConfiguration(data) {
     },
     mister: { present: (data[8] & 16) !== 0 },
   };
-  
+
   // Return the device configuration
   return deviceConfiguration;
 }
@@ -487,26 +497,26 @@ function generateButtonSciXML(data) {
 export async function updatePumpState(pumpId, state) {
   // Get the button for the pump
   const pumpButton = BUTTON_MAP.pumps[pumpId];
-  
+
   // If there's no button for the pump, throw an error
   if (!pumpButton) {
     throw new Error("Invalid pump id");
   }
-  
+
   // Get the current panel data
   const currentPanelData = await getPanelData();
-  
+
   // If there's no panel data, throw an error
   if (!currentPanelData) {
     throw new Error("No panel data");
   }
-  
+
   // Get the current state of the pump
   const currentPumpState = currentPanelData.pumpStates[pumpId];
-  
+
   // Define the state string
   const stateString = state ? "on" : "off";
-  
+
   // If the state is already the desired state, return a message
   if (state === currentPumpState.state) {
     return "Pump already in that state";
@@ -514,13 +524,13 @@ export async function updatePumpState(pumpId, state) {
 
   // Generate the body data
   const bodyData = `${pumpButton}:${stateString}`;
-  
+
   // Generate the XML request body
   const xmlRequestBody = generateButtonSciXML(bodyData);
-  
+
   // Make the SCI request
   const response = await makeSciRequest(xmlRequestBody);
-  
+
   // Return the response
   return response;
 }
@@ -529,26 +539,26 @@ export async function updatePumpState(pumpId, state) {
 export async function updateLightState(lightId, state) {
   // Get the button for the light
   const lightButton = BUTTON_MAP.lights[lightId];
-  
+
   // If there's no button for the light, throw an error
   if (!lightButton) {
     throw new Error("Invalid light id");
   }
-  
+
   // Get the current panel data
   const currentPanelData = await getPanelData();
-  
+
   // If there's no panel data, throw an error
   if (!currentPanelData) {
     throw new Error("No panel data");
   }
-  
+
   // Get the current state of the light
   const currentLightState = currentPanelData.lightStates[lightId];
-  
+
   // Define the state string
   const stateString = state ? "on" : "off";
-  
+
   // If the state is already the desired state, return a message
   if (state === currentLightState.state) {
     return "Light already in that state";
@@ -556,13 +566,13 @@ export async function updateLightState(lightId, state) {
 
   // Generate the body data
   const bodyData = `${lightButton}:${stateString}`;
-  
+
   // Generate the XML request body
   const xmlRequestBody = generateButtonSciXML(bodyData);
-  
+
   // Make the SCI request
   const response = await makeSciRequest(xmlRequestBody);
-  
+
   // Return the response
   return response;
 }
@@ -571,26 +581,26 @@ export async function updateLightState(lightId, state) {
 export async function updateAuxState(auxId, state) {
   // Get the button for the auxiliary device
   const auxButton = BUTTON_MAP.auxs[auxId];
-  
+
   // If there's no button for the auxiliary device, throw an error
   if (!auxButton) {
     throw new Error("Invalid aux id");
   }
-  
+
   // Get the current panel data
   const currentPanelData = await getPanelData();
-  
+
   // If there's no panel data, throw an error
   if (!currentPanelData) {
     throw new Error("No panel data");
   }
-  
+
   // Get the current state of the auxiliary device
   const currentAuxState = currentPanelData.auxStates[auxId];
-  
+
   // Define the state string
   const stateString = state ? "on" : "off";
-  
+
   // If the state is already the desired state, return a message
   if (state === currentAuxState.state) {
     return "Aux already in that state";
@@ -598,13 +608,13 @@ export async function updateAuxState(auxId, state) {
 
   // Generate the body data
   const bodyData = `${auxButton}:${stateString}`;
-  
+
   // Generate the XML request body
   const xmlRequestBody = generateButtonSciXML(bodyData);
-  
+
   // Make the SCI request
   const response = await makeSciRequest(xmlRequestBody);
-  
+
   // Return the response
   return response;
 }
@@ -613,18 +623,18 @@ export async function updateAuxState(auxId, state) {
 export async function updateBlowerState(state) {
   // Get the current panel data
   const currentPanelData = await getPanelData();
-  
+
   // If there's no panel data, throw an error
   if (!currentPanelData) {
     throw new Error("No panel data");
   }
-  
+
   // Get the current state of the blower
   const currentBlowerState = currentPanelData.blowerState;
-  
+
   // Define the state string
   const stateString = state ? "on" : "off";
-  
+
   // If the state is already the desired state, return a message
   if (state === currentBlowerState.state) {
     return "Blower already in that state";
@@ -632,13 +642,13 @@ export async function updateBlowerState(state) {
 
   // Generate the body data
   const bodyData = `${BUTTON_MAP.blower}:${stateString}`;
-  
+
   // Generate the XML request body
   const xmlRequestBody = generateButtonSciXML(bodyData);
-  
+
   // Make the SCI request
   const response = await makeSciRequest(xmlRequestBody);
-  
+
   // Return the response
   return response;
 }
@@ -647,18 +657,18 @@ export async function updateBlowerState(state) {
 export async function updateMisterState(state) {
   // Get the current panel data
   const currentPanelData = await getPanelData();
-  
+
   // If there's no panel data, throw an error
   if (!currentPanelData) {
     throw new Error("No panel data");
   }
-  
+
   // Get the current state of the mister
   const currentMisterState = currentPanelData.misterState;
-  
+
   // Define the state string
   const stateString = state ? "on" : "off";
-  
+
   // If the state is already the desired state, return a message
   if (state === currentMisterState.state) {
     return "Mister already in that state";
@@ -666,13 +676,13 @@ export async function updateMisterState(state) {
 
   // Generate the body data
   const bodyData = `${BUTTON_MAP.mister}:${stateString}`;
-  
+
   // Generate the XML request body
   const xmlRequestBody = generateButtonSciXML(bodyData);
-  
+
   // Make the SCI request
   const response = await makeSciRequest(xmlRequestBody);
-  
+
   // Return the response
   return response;
 }
@@ -681,17 +691,17 @@ export async function updateMisterState(state) {
 export async function setTemperature(temperature) {
   // Get the current panel data
   const currentPanelData = await getPanelData();
-  
+
   // If there's no panel data, throw an error
   if (!currentPanelData) {
     throw new Error("No panel data");
   }
-  
+
   // If the temperature is already the desired temperature, return a message
   if (temperature === currentPanelData.targetTemperature) {
     return "Temperature already set to that value";
   }
-  
+
   // If the panel data is in Celsius, convert the temperature to Fahrenheit
   if (currentPanelData.isCelsius) {
     temperature = temperature * 2;
@@ -699,10 +709,10 @@ export async function setTemperature(temperature) {
 
   // Generate the XML request body
   const xmlRequestBody = `<sci_request version="1.0"><data_service><targets><device id="${device_id}"/></targets><requests><device_request target_name="SetTemp">${temperature}</device_request></requests></data_service></sci_request>`;
-  
+
   // Make the SCI request
   const response = await makeSciRequest(xmlRequestBody);
-  
+
   // Return the response
   return response;
 }
@@ -711,15 +721,15 @@ export async function setTemperature(temperature) {
 export async function setTemperatureRange(rangeHigh) {
   // Get the current panel data
   const currentPanelData = await getPanelData();
-  
+
   // If there's no panel data, throw an error
   if (!currentPanelData) {
     throw new Error("No panel data");
   }
-  
+
   // Get the current range
   const currentRange = currentPanelData.range;
-  
+
   // If the range is already the desired range, return a message
   if (rangeHigh === currentRange.state) {
     return "Temperature range already set to that value";
@@ -727,10 +737,10 @@ export async function setTemperatureRange(rangeHigh) {
 
   // Generate the XML request body
   const xmlRequestBody = generateButtonSciXML(BUTTON_MAP.TempRange);
-  
+
   // Make the SCI request
   const response = await makeSciRequest(xmlRequestBody);
-  
+
   // Return the response
   return response;
 }
@@ -739,12 +749,12 @@ export async function setTemperatureRange(rangeHigh) {
 export async function setHoldMode(setToHold) {
   // Get the current panel data
   const currentPanelData = await getPanelData();
-  
+
   // If there's no panel data, throw an error
   if (!currentPanelData) {
     throw new Error("No panel data");
   }
-  
+
   // If the hold mode is already the desired mode, return a message
   // if ((setToHold && currentPanelData.spaState === "Hold Mode") || (!setToHold && currentPanelData.spaState !== "Hold Mode")) {
   //   return "Hold mode already set to that value";
@@ -752,10 +762,10 @@ export async function setHoldMode(setToHold) {
 
   // Generate the XML request body
   const xmlRequestBody = generateButtonSciXML(currentPanelData.holdMode.state ? BUTTON_MAP.NormalOperation : BUTTON_MAP.HoldMode);
-  
+
   // Make the SCI request
   const response = await makeSciRequest(xmlRequestBody);
-  
+
   // Return the response
   return response;
 }
@@ -764,15 +774,15 @@ export async function setHoldMode(setToHold) {
 export async function setHeatMode(setToReady) {
   // Get the current panel data
   const currentPanelData = await getPanelData();
-  
+
   // If there's no panel data, throw an error
   if (!currentPanelData) {
     throw new Error("No panel data");
   }
-  
+
   // Get the current heat mode
   const currentHeatMode = currentPanelData.heatMode;
-  
+
   // If the heat mode is already the desired mode, return a message
   if ((setToReady && currentHeatMode === "Ready") || (!setToReady && currentHeatMode === "Rest")) {
     return "Heat mode already set to that value";
@@ -780,10 +790,10 @@ export async function setHeatMode(setToReady) {
 
   // Generate the XML request body
   const xmlRequestBody = generateButtonSciXML(BUTTON_MAP.HeatMode);
-  
+
   // Make the SCI request
   const response = await makeSciRequest(xmlRequestBody);
-  
+
   // Return the response
   return response;
 }
@@ -792,10 +802,10 @@ export async function setHeatMode(setToReady) {
 export async function setSystemTime(hours, minutes) {
   // Generate the XML request body
   const xmlRequestBody = `<sci_request version="1.0"><data_service><targets><device id="${device_id}"/></targets><requests><device_request target_name="SystemTime">${hours}:${minutes}</device_request></requests></data_service></sci_request>`;
-  
+
   // Make the SCI request
   const response = await makeSciRequest(xmlRequestBody);
-  
+
   // Return the response
   return response;
 }
@@ -804,10 +814,10 @@ export async function setSystemTime(hours, minutes) {
 export async function setTimeFormat(is24HourTime) {
   // Generate the XML request body
   const xmlRequestBody = `<sci_request version="1.0"><data_service><targets><device id="${device_id}"/></targets><requests><device_request target_name="TimeFormat">${is24HourTime ? 24 : 12}</device_request></requests></data_service></sci_request>`;
-  
+
   // Make the SCI request
   const response = await makeSciRequest(xmlRequestBody);
-  
+
   // Return the response
   return response;
 }
@@ -816,10 +826,10 @@ export async function setTimeFormat(is24HourTime) {
 export async function setTempUnits(isCelsius) {
   // Generate the XML request body
   const xmlRequestBody = `<sci_request version="1.0"><data_service><targets><device id="${device_id}"/></targets><requests><device_request target_name="TempUnits">${isCelsius ? "C" : "F"}</device_request></requests></data_service></sci_request>`;
-  
+
   // Make the SCI request
   const response = await makeSciRequest(xmlRequestBody);
-  
+
   // Return the response
   return response;
 }
