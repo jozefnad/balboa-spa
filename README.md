@@ -32,10 +32,6 @@ Users can control:
 
 - Balboa Cloud API (bwgapi)
 
-### Alternative backend avoiding balboa cloud
+#### Alternative backend avoiding balboa cloud
 
 https://github.com/NorthernMan54/esp32_balboa_panel
-
-## Recommended IDE Setup
-
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
