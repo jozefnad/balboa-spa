@@ -1,5 +1,12 @@
 # Balboa SPA Web (cloud control of your hot tub)
 
+> [!WARNING]
+> **DEPRECATED / UNMAINTAINED**
+> 
+> This project is no longer functional or actively maintained. Balboa has changed their server/API access structure to a paid subscription model, breaking compatibility with this tool.
+> 
+> This repository remains public for archival purposes only.
+
 This project is a progressive web application (PWA) for controlling Balboa SPA hot tubs. It works as a web, Android, and iOS app.
 
 <img src="./ScreenShot.jpg" data-canonical-src="./ScreenShot.jpg" height="550" />
